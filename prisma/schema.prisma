@@ -1,0 +1,52 @@
+// Dev default is SQLite (zero setup). For production, switch provider to
+// "postgresql" and point DATABASE_URL at a real database (Supabase, Neon,
+// Vercel Postgres, RDS, etc) — see README.md.
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                   String   @id @default(cuid())
+  name                 String
+  email                String   @unique
+  passwordHash         String
+  premium              Boolean  @default(false)
+  stripeCustomerId     String?  @unique
+  stripeSubscriptionId String?
+  createdAt            DateTime @default(now())
+
+  reports  Report[]
+  searches Search[]
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  type        String // phone | business | name | social
+  valueRaw    String
+  valueNorm   String
+  category    String
+  description String
+  reporterId  String
+  reporter    User     @relation(fields: [reporterId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([valueNorm])
+  @@index([type])
+}
+
+model Search {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  query     String
+  type      String
+  risk      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
