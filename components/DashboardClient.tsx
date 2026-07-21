@@ -32,20 +32,30 @@ export default function DashboardClient({
 
   const handleUpgrade = async () => {
     setLoading(true);
-    const res = await fetch("/api/stripe/checkout", { method: "POST" });
-    const data = await res.json();
-    setLoading(false);
-    if (data.url) window.location.href = data.url;
-    else setToast({ risk: "caution", detail: data.error || "Couldn't start checkout." });
+    try {
+      const res = await fetch("/api/stripe/checkout", { method: "POST" });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else setToast({ risk: "caution", detail: data.error || "Couldn't start checkout." });
+    } catch {
+      setToast({ risk: "caution", detail: "Couldn't reach the server — try again." });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleManageBilling = async () => {
     setLoading(true);
-    const res = await fetch("/api/stripe/portal", { method: "POST" });
-    const data = await res.json();
-    setLoading(false);
-    if (data.url) window.location.href = data.url;
-    else setToast({ risk: "caution", detail: data.error || "Couldn't open billing portal." });
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else setToast({ risk: "caution", detail: data.error || "Couldn't open billing portal." });
+    } catch {
+      setToast({ risk: "caution", detail: "Couldn't reach the server — try again." });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogout = async () => {
